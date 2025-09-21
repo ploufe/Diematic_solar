@@ -481,11 +481,13 @@ class Diematic:
 			self._zoneBNightTargetTemp=None;
 			self._zoneBAntiiceTargetTemp=None;
 
-		# nbImpuls coded in hex on 2 registers
-		self._nbImpuls = self.hex2reg(DDREGISTER.NB_IMPULS_DIX, DDREGISTER.NB_IMPULS_UNIT);
-		
-		# fctBrul coded in hex on 2 registers
-		self._fctBrul = self.hex2reg(DDREGISTER.FCT_BRUL_DIX, DDREGISTER.FCT_BRUL_UNIT);
+		#for Diematic Delta regulator only
+		if type(self).__name__ == "DiematicDeltaPanel":
+			# nbImpuls coded in hex on 2 registers
+			self._nbImpuls = self.hex2reg(DDREGISTER.NB_IMPULS_DIX, DDREGISTER.NB_IMPULS_UNIT);
+			
+			# fctBrul coded in hex on 2 registers
+			self._fctBrul = self.hex2reg(DDREGISTER.FCT_BRUL_DIX, DDREGISTER.FCT_BRUL_UNIT);
 
 		self.updateCallback();
 
