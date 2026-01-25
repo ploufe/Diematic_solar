@@ -42,7 +42,7 @@ class Hassio:
 		discoveryTopic=self.discovery_prefix+'/sensor/'+self.clientId+'/'+object_id+'/config';
 		#build discovery message payload
 		payload={"name":name};
-		payload["object_id"]=object_id;
+		payload["default_entity_id"]='sensor.'+object_id;
 		payload["unique_id"]=self.clientId+'.'+object_id;
 		if (deviceClass is not None):
 			payload["device_class"]=deviceClass;
@@ -63,7 +63,7 @@ class Hassio:
 		discoveryTopic=self.discovery_prefix+'/binary_sensor/'+self.clientId+'/'+object_id+'/config';
 		#build discovery message payload
 		payload={"name":name};
-		payload["object_id"]=object_id;
+		payload["default_entity_id"]='binary_sensor.'+object_id;
 		payload["unique_id"]=self.clientId+'.'+object_id;
 		if (deviceClass is not None):
 			payload["device_class"]=deviceClass;
@@ -83,7 +83,7 @@ class Hassio:
 		discoveryTopic=self.discovery_prefix+'/number/'+self.clientId+'/'+object_id+'/config';
 		#build discovery message payload
 		payload={"name":name};
-		payload["object_id"]=object_id;
+		payload["default_entity_id"]='number.'+object_id;
 		payload["unique_id"]=self.clientId+'.'+object_id;
 		payload["state_topic"]=self.topicRoot+'/'+shortStateTopic;
 		payload["command_topic"]=self.topicRoot+'/'+shortCommandTopic;
@@ -105,7 +105,7 @@ class Hassio:
 		discoveryTopic=self.discovery_prefix+'/select/'+self.clientId+'/'+object_id+'/config';
 		#build discovery message payload
 		payload={"name":name};
-		payload["object_id"]=object_id;
+		payload["default_entity_id"]='select.'+object_id;
 		payload["unique_id"]=self.clientId+'.'+object_id;
 		payload["state_topic"]=self.topicRoot+'/'+shortStateTopic;
 		payload["command_topic"]=self.topicRoot+'/'+shortCommandTopic;
@@ -123,7 +123,7 @@ class Hassio:
 		discoveryTopic=self.discovery_prefix+'/switch/'+self.clientId+'/'+object_id+'/config';
 		#build discovery message payload
 		payload={"name":name};
-		payload["object_id"]=object_id;
+		payload["default_entity_id"]='switch.'+object_id;
 		payload["unique_id"]=self.clientId+'.'+object_id;
 		if (shortStateTopic is not None):
 			payload["state_topic"]=self.topicRoot+'/'+shortStateTopic;
