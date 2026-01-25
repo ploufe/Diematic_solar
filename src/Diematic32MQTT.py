@@ -121,7 +121,7 @@ def haSendDiscoveryMessages(client, userdata, message):
 		hassio.addSensor('water_pressure',"Pression d'eau",'pressure','waterPressure',None,"bar");
 		hassio.addSensor('power',"Puissance",'power_factor','power',None,"%");
 		hassio.addSensor('smoke_temp',"Température Fumées",'temperature','smokeTemp',None,"°C");
-		hassio.addSensor('ionization_current',"Courant Ionisation",'current','ionizationCurrent',None,"µA");	
+		hassio.addSensor('ionization_current',"Courant Ionisation",'current','ionizationCurrent',None,None);	
 		hassio.addSensor('fan_speed',"Vitesse Ventilateur",None,'fanSpeed',None,"RPM");	
 		hassio.addBinarySensor('burner_status',"Etat Bruleur",None,'burnerStatus',"1","0");	
 		hassio.addSensor('pump_power',"Puissance Pompe",'power_factor','pumpPower',None,"%");
