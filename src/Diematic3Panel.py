@@ -61,7 +61,7 @@ class Diematic3Panel(Diematic):
 		else:
 			return(False);
 		#update registers 448->470
-		reg=self.modBusInterface.masterReadAnalog(self.regulatorAddress,448,23);	
+		reg=self.modBusInterface.masterReadAnalog(self.regulatorAddress,448,26);	
 		if (reg is not None):
 			self.registers.update(reg);
 		else:
