@@ -1,0 +1,14 @@
+version: '3'
+services:
+  diematic:
+    container_name: diematic
+    restart: unless-stopped
+    build: .
+    volumes:
+      - /home/ploufe/docker/diematic/conf:/app/conf
+      - /home/ploufe/docker/diematic/log:/app/log
+    networks:
+      - proxy
+networks:
+  proxy:
+    external: true
