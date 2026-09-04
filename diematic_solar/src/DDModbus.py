@@ -314,7 +314,7 @@ class DDModbus:
 				self.logger.info('Ack OK');
 				return(True);
 			else:
-				self.logger.warning('Ack KO. Waited Ack was : '+waited_ack.hex());
+				self.logger.warning('Ack KO. Waited Ack was : '+waited_ack.hex()+' received: '+answer.hex());
 				return(False);
 			
 			
