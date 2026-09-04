@@ -102,6 +102,11 @@ def diematicPublish(self):
 	buffer.update('zoneB/nightTemp',floatValue(self.zoneBNightTargetTemp));
 	buffer.update('zoneB/antiiceTemp',floatValue(self.zoneBAntiiceTargetTemp));
 	
+	#solar
+	buffer.update('solar/temp',floatValue(self.solarTemp));
+	buffer.update('solar/boilerTemp',floatValue(self.solarBoilerTemp));
+	buffer.update('solar/power',floatValue(self.instantPower));
+	
 	#send MQTT messages
 	buffer.send();
 
@@ -137,6 +142,11 @@ def haSendDiscoveryMessages(client, userdata, message):
 		hassio.addSensor('hot_water_mode',"Mode ECS",None,'hotWater/mode',None,None);
 		hassio.addNumber('hot_water_temp_day',"Température ECS Jour",'hotWater/dayTemp','hotWater/dayTemp/set',10,80,5,"°C");
 		hassio.addNumber('hot_water_temp_night',"Température ECS Nuit",'hotWater/nightTemp','hotWater/nightTemp/set',10,80,5,"°C");
+		
+		#solar
+		hassio.addSensor('solar_temp',"Température Capteur Solaire",'temperature','solar/temp',None,"°C");
+		hassio.addSensor('solar_boiler_temp',"Température Ballon Solaire",'temperature','solar/boilerTemp',None,"°C");
+		hassio.addSensor('solar_power',"Puissance Instantanée",'power','solar/power',None,"kW");
 		
 		#area A
 		hassio.addSensor('zone_A_temp',"Température Zone A",'temperature','zoneA/temp',None,"°C");
