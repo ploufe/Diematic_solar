@@ -60,6 +60,10 @@ def diematicPublish(self):
 		
 	#boiler
 	buffer.update('status',ONLINE if self.availability else OFFLINE);
+	if not self.availability:
+		# Keep retained measurements when Modbus is temporarily unavailable.
+		buffer.send();
+		return;
 	buffer.update('date',self.datetime.isoformat() if self.datetime is not None else '');
 	buffer.update('lastTimeSync',self.lastTimeSync.isoformat() if self.lastTimeSync is not None else '');
 	buffer.update('type',intValue(self.type));
