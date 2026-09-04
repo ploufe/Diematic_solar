@@ -386,6 +386,8 @@ class Diematic:
 		self.returnTemp=self.float10(self.registers[DDREGISTER.RETURN_TEMP]);
 		self.waterPressure=self.float10(self.registers[DDREGISTER.PRESSION_EAU]);
 		self.smokeTemp=self.float10(self.registers[DDREGISTER.SMOKE_TEMP]);
+		if self.smokeTemp is not None and self.smokeTemp < -50:
+			self.smokeTemp=None;
 		self.ionizationCurrent=self.float10(self.registers[DDREGISTER.IONIZATION_CURRENT]);
 		self.fanSpeed=self.registers[DDREGISTER.FAN_SPEED];
 		self.burnerStatus=(self.registers[DDREGISTER.BASE_ECS] & 0x08) >>3;

@@ -136,7 +136,7 @@ def haSendDiscoveryMessages(client, userdata, message):
 		hassio.addSensor('pump_power',"Puissance Pompe",'power_factor','pumpPower',None,"%");
 		hassio.addSensor('alarm',"Etat",None,'alarm',"{{ value_json.txt}}",None);
 		hassio.addSensor('alarm_id',"N° Erreur",None,'alarm',"{{ value_json.id}}",None);
-		hassio.addSensor('nb_impuls',"Impulsions Bruleur",None,'nbImpuls',None,None);	
+		hassio.removeEntity('sensor','nb_impuls');
 		hassio.addSensor('fct_brul',"Fonctionnement Bruleur",None,'fctBrul',None,"hours");
 		
 		#hot water
@@ -162,13 +162,17 @@ def haSendDiscoveryMessages(client, userdata, message):
 		hassio.addNumber('zone_A_temp_antiice',"Température Antigel Zone A",'zoneA/antiiceTemp','zoneA/antiiceTemp/set',5,20,0.5,"°C");
 		
 		#area B
-		hassio.addSensor('zone_B_temp',"Température Zone B",'temperature','zoneB/temp',None,"°C");
-		hassio.addSelect('zone_B_mode',"Mode Zone B",'zoneB/mode','zoneB/mode/set',['AUTO','TEMP JOUR','PERM JOUR','TEMP NUIT','PERM NUIT','ANTIGEL']);
-		hassio.addSensor('zone_B_mode',"Mode Zone B",None,'zoneB/mode',None,None);
-		hassio.addBinarySensor('zone_B_pump',"Pompe Zone B",None,'zoneB/pump',"1","0");
-		hassio.addNumber('zone_B_temp_day',"Température Jour Zone B",'zoneB/dayTemp','zoneB/dayTemp/set',5,30,0.5,"°C");
-		hassio.addNumber('zone_B_temp_night',"Température Nuit Zone B",'zoneB/nightTemp','zoneB/nightTemp/set',5,30,0.5,"°C");
-		hassio.addNumber('zone_B_temp_antiice',"Température Antigel Zone B",'zoneB/antiiceTemp','zoneB/antiiceTemp/set',5,20,0.5,"°C");		
+		if (panel.zoneBMode is not None) or panel.forceCircuitB:
+			hassio.addSensor('zone_B_temp',"Température Zone B",'temperature','zoneB/temp',None,"°C");
+			hassio.addSelect('zone_B_mode',"Mode Zone B",'zoneB/mode','zoneB/mode/set',['AUTO','TEMP JOUR','PERM JOUR','TEMP NUIT','PERM NUIT','ANTIGEL']);
+			hassio.addSensor('zone_B_mode',"Mode Zone B",None,'zoneB/mode',None,None);
+			hassio.addBinarySensor('zone_B_pump',"Pompe Zone B",None,'zoneB/pump',"1","0");
+			hassio.addNumber('zone_B_temp_day',"Température Jour Zone B",'zoneB/dayTemp','zoneB/dayTemp/set',5,30,0.5,"°C");
+			hassio.addNumber('zone_B_temp_night',"Température Nuit Zone B",'zoneB/nightTemp','zoneB/nightTemp/set',5,30,0.5,"°C");
+			hassio.addNumber('zone_B_temp_antiice',"Température Antigel Zone B",'zoneB/antiiceTemp','zoneB/antiiceTemp/set',5,20,0.5,"°C");
+		else:
+			for component, object_id in [('sensor','zone_B_temp'),('select','zone_B_mode'),('sensor','zone_B_mode'),('binary_sensor','zone_B_pump'),('number','zone_B_temp_day'),('number','zone_B_temp_night'),('number','zone_B_temp_antiice')]:
+				hassio.removeEntity(component,object_id);
 		
 	
 def on_connect(client, userdata, flags, reason_code, properties=None):

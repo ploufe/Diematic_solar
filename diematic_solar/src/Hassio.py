@@ -44,6 +44,10 @@ class Hassio:
 			payload["availability_topic"]=self.availabilityTopic;
 			payload["payload_available"]=self.payload_available;
 			payload["payload_not_available"]=self.payload_not_available;
+
+	def removeEntity(self,component,object_id):
+		discoveryTopic=self.discovery_prefix+'/'+component+'/'+self.clientId+'/'+object_id+'/config';
+		self.mqtt.publish(discoveryTopic,'',1,True);
 	
 	def addSensor(self,object_id,name,deviceClass,shortStateTopic,valueTemplate,unit_of_measurement):
 		#build discovery topic
