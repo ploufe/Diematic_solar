@@ -192,7 +192,7 @@ class DDModbus:
 		while run:
 			try:
 				self.socket.settimeout(DDModbus.CLEANING_TIMEOUT);
-				data=self._receive_frame(modbusSlaveAddress,False);
+				data=self.socket.recv(2048);
 				self.logger.debug('Cleaning of: '+str(len(data))+' bytes(s)');
 			except socket.error as exc:
 				run=False;
@@ -200,7 +200,7 @@ class DDModbus:
 	def slaveRx(self,modbusSlaveAddress):
 			try:
 				self.socket.settimeout(DDModbus.SLAVE_RX_TIMEOUT);
-				data=self.socket.recv(2048);
+				data=self._receive_frame(modbusSlaveAddress,False);
 				self.logger.debug('Frame received: '+data.hex());
 				
 				#frame consistency check
