@@ -494,12 +494,12 @@ class Diematic:
 			
 			# fctBrul coded in hex on 2 registers
 			self._fctBrul = self.hex2reg(DDREGISTER.FCT_BRUL_DIX, DDREGISTER.FCT_BRUL_UNIT);
-			
-			#Solar			
-			self.solarTemp=self.float10(self.registers.get(DDREGISTER.SOLAR_TEMP, 0xFFFF));
-			self.solarBoilerTemp=self.float10(self.registers.get(DDREGISTER.SOLAR_BOILER_TEMP, 0xFFFF));
-			self.instantPower=self.float10(self.registers.get(DDREGISTER.INSTANT_POWER, 0xFFFF));
-			
+
+		# Solar registers are available on Diematic 3, Diematic 4 and Delta.
+		self.solarTemp=self.float10(self.registers.get(DDREGISTER.SOLAR_TEMP, 0xFFFF));
+		self.solarBoilerTemp=self.float10(self.registers.get(DDREGISTER.SOLAR_BOILER_TEMP, 0xFFFF));
+		self.instantPower=self.float10(self.registers.get(DDREGISTER.INSTANT_POWER, 0xFFFF));
+
 		self.updateCallback();
 
 	
