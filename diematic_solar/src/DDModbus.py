@@ -145,6 +145,8 @@ class DDModbus:
 						self.rxBuffer.clear();
 						continue;
 					del self.rxBuffer[:start];
+					if len(self.rxBuffer) < 2:
+						continue;
 
 				functionCode=self.rxBuffer[1];
 				if functionCode == DDModbus.READ_ANALOG_HOLDING_REGISTERS:
