@@ -19,6 +19,7 @@ enable_circuit_a=$(bashio::config 'enable_circuit_a')
 enable_circuit_b=$(bashio::config 'enable_circuit_b')
 discovery_enable=$(bashio::config 'discovery_enable')
 discovery_prefix=$(bashio::config 'discovery_prefix')
+keep_last_state=$(bashio::config 'keep_last_state')
 serial_device=$(bashio::config 'serial_device')
 solar_enabled=$(bashio::config 'solar_enabled')
 
@@ -57,6 +58,7 @@ printf '%s\n' \
   '[Home Assistant]' \
   "MQTT_DiscoveryEnable: $discovery_enable" \
   "discovery_prefix: $discovery_prefix" \
+  "keep_last_state: $keep_last_state" \
   > /app/conf/Diematic32MQTT.conf
 
 cd /app

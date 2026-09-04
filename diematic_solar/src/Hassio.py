@@ -6,7 +6,7 @@ import logging,json
 #This class allow to interface with Home Assistant through the MQTT Discovery Protocol
 class Hassio:
 
-	def __init__(self,mqttClient,topicRoot,clientId,discovery_prefix):
+	def __init__(self,mqttClient,topicRoot,clientId,discovery_prefix,availability_enabled=True):
 		
 		#logger
 		self.logger = logging.getLogger(__name__);
@@ -17,6 +17,7 @@ class Hassio:
 		self.topicRoot=topicRoot;
 		self.clientId=clientId;
 		self.discovery_prefix=discovery_prefix;
+		self.availability_enabled=availability_enabled;
 		self.device = {
 			"identifiers": [""],
 			"manufacturer": "",
@@ -33,9 +34,16 @@ class Hassio:
 	def availabilityInfo(self,shortTopic,payload_available,payload_not_available):
 		#availability info saving
 		
-		self.availabilityTopic=self.topicRoot+'/'+shortTopic;
-		self.payload_available=payload_available;
-		self.payload_not_available=payload_not_available;
+		if self.availability_enabled:
+			self.availabilityTopic=self.topicRoot+'/'+shortTopic;
+			self.payload_available=payload_available;
+			self.payload_not_available=payload_not_available;
+
+	def addAvailability(self,payload):
+		if self.availability_enabled:
+			payload["availability_topic"]=self.availabilityTopic;
+			payload["payload_available"]=self.payload_available;
+			payload["payload_not_available"]=self.payload_not_available;
 	
 	def addSensor(self,object_id,name,deviceClass,shortStateTopic,valueTemplate,unit_of_measurement):
 		#build discovery topic
@@ -49,9 +57,7 @@ class Hassio:
 		payload["state_topic"]=self.topicRoot+'/'+shortStateTopic;
 		if (valueTemplate is not None):
 			payload["value_template"]=valueTemplate;
-		payload["availability_topic"]=self.availabilityTopic;
-		payload["payload_available"]=self.payload_available;
-		payload["payload_not_available"]=self.payload_not_available;
+		self.addAvailability(payload);
 		if (unit_of_measurement is not None):
 			payload["unit_of_measurement"]=unit_of_measurement;
 		payload['device'] = self.device
@@ -70,9 +76,7 @@ class Hassio:
 		payload["state_topic"]=self.topicRoot+'/'+shortStateTopic;
 		payload["payload_on"]=payload_on;
 		payload["payload_off"]=payload_off;
-		payload["availability_topic"]=self.availabilityTopic;
-		payload["payload_available"]=self.payload_available;
-		payload["payload_not_available"]=self.payload_not_available;
+		self.addAvailability(payload);
 		payload["enabled_by_default"]=False;
 		payload['device'] = self.device
 		#send discovery message
@@ -87,9 +91,7 @@ class Hassio:
 		payload["unique_id"]=self.clientId+'.'+object_id;
 		payload["state_topic"]=self.topicRoot+'/'+shortStateTopic;
 		payload["command_topic"]=self.topicRoot+'/'+shortCommandTopic;
-		payload["availability_topic"]=self.availabilityTopic;
-		payload["payload_available"]=self.payload_available;
-		payload["payload_not_available"]=self.payload_not_available;
+		self.addAvailability(payload);
 		payload["qos"]=2;
 		payload["min"]=min;
 		payload["max"]=max;
@@ -109,9 +111,7 @@ class Hassio:
 		payload["unique_id"]=self.clientId+'.'+object_id;
 		payload["state_topic"]=self.topicRoot+'/'+shortStateTopic;
 		payload["command_topic"]=self.topicRoot+'/'+shortCommandTopic;
-		payload["availability_topic"]=self.availabilityTopic;
-		payload["payload_available"]=self.payload_available;
-		payload["payload_not_available"]=self.payload_not_available;
+		self.addAvailability(payload);
 		payload["qos"]=2;
 		payload["options"]=options;
 		payload['device'] = self.device
@@ -128,9 +128,7 @@ class Hassio:
 		if (shortStateTopic is not None):
 			payload["state_topic"]=self.topicRoot+'/'+shortStateTopic;
 		payload["command_topic"]=self.topicRoot+'/'+shortCommandTopic;
-		payload["availability_topic"]=self.availabilityTopic;
-		payload["payload_available"]=self.payload_available;
-		payload["payload_not_available"]=self.payload_not_available;
+		self.addAvailability(payload);
 		payload["payload_off"]=payload_off;
 		payload["payload_on"]=payload_on;		
 		payload["qos"]=2;

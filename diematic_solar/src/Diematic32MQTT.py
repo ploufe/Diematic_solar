@@ -310,6 +310,7 @@ if __name__ == '__main__':
 		#Home Assistant discovery settings
 		hassioDiscoveryEnable=config.getboolean('Home Assistant','MQTT_DiscoveryEnable');
 		hassioDiscoveryPrefix=config.get('Home Assistant','discovery_prefix');	
+		keepLastState=config.getboolean('Home Assistant','keep_last_state',fallback=True);
 		
 		logger.critical('Hassio Discovery Enable: '+ str(hassioDiscoveryEnable));
 		logger.critical('Hassio Discovery Prefix: '+ hassioDiscoveryPrefix);
@@ -357,7 +358,7 @@ if __name__ == '__main__':
 		
 		#create HomeAssistant discovery instance
 
-		hassio=Hassio.Hassio(client,mqttTopicPrefix,mqttClientId,hassioDiscoveryPrefix);
+		hassio=Hassio.Hassio(client,mqttTopicPrefix,mqttClientId,hassioDiscoveryPrefix,not keepLastState);
 		hassio.availabilityInfo('status',ONLINE,OFFLINE);
 		hassio.setDevice("De Dietrich",regulatorType,mqttClientId)
 	

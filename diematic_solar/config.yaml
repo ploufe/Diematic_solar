@@ -1,5 +1,5 @@
 name: "Diematic Solar"
-version: "1.0.2"
+version: "1.0.3"
 slug: "diematic_solar"
 description: "Publie les données d'une chaudière Diematic sur MQTT et Home Assistant"
 url: "https://github.com/ploufe/Diematic_solar"
@@ -33,6 +33,7 @@ options:
   enable_circuit_b: false
   discovery_enable: true
   discovery_prefix: "homeassistant"
+  keep_last_state: true
   serial_device: ""
   solar_enabled: true
 schema:
@@ -54,5 +55,6 @@ schema:
   enable_circuit_b: bool
   discovery_enable: bool
   discovery_prefix: str
+  keep_last_state: bool
   serial_device: str
   solar_enabled: bool
