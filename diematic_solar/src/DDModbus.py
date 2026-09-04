@@ -128,69 +128,9 @@ class DDModbus:
 		self.port=port;
 		self.socket=socket.socket(socket.AF_INET, socket.SOCK_STREAM);
 		self.socket.connect((self.ip,self.port));
-		self.rxBuffer=bytearray();
-
-	def _receive_frame(self,modbusAddress,master,expectedFunction=None,expectedByteCount=None):
-		while True:
-			# TCP does not preserve Modbus frame boundaries: buffer and extract one frame.
-			while True:
-				if len(self.rxBuffer) < 2:
-					self.rxBuffer.extend(self.socket.recv(2048));
-					continue;
-
-				if self.rxBuffer[0] != modbusAddress:
-					try:
-						start=self.rxBuffer.index(modbusAddress);
-					except ValueError:
-						self.rxBuffer.clear();
-						continue;
-					del self.rxBuffer[:start];
-					if len(self.rxBuffer) < 2:
-						continue;
-
-				functionCode=self.rxBuffer[1];
-				if functionCode == DDModbus.READ_ANALOG_HOLDING_REGISTERS:
-					if master:
-						if len(self.rxBuffer) < 3:
-							self.rxBuffer.extend(self.socket.recv(2048));
-							continue;
-						frameLength=5+self.rxBuffer[2];
-					else:
-						frameLength=8;
-				elif functionCode == DDModbus.WRITE_MULTIPLE_REGISTERS:
-					if master:
-						frameLength=8;
-					else:
-						if len(self.rxBuffer) < 7:
-							self.rxBuffer.extend(self.socket.recv(2048));
-							continue;
-						frameLength=9+self.rxBuffer[6];
-				else:
-					del self.rxBuffer[0];
-					continue;
-
-				if len(self.rxBuffer) < frameLength:
-					self.rxBuffer.extend(self.socket.recv(2048));
-					continue;
-
-				frame=bytes(self.rxBuffer[:frameLength]);
-				del self.rxBuffer[:frameLength];
-				if self.rxBuffer[:1] == b'\x00':
-					del self.rxBuffer[0];
-
-				if master and functionCode != expectedFunction:
-					self.logger.warning('Ignoring unexpected Modbus function: '+hex(functionCode));
-					continue;
-				if (master and expectedByteCount is not None and
-						functionCode == DDModbus.READ_ANALOG_HOLDING_REGISTERS and
-						frame[2] != expectedByteCount):
-					self.logger.warning('Ignoring unexpected Modbus byte count: '+str(frame[2]));
-					continue;
-				return frame;
 		
 	def clean(self):
 		run= True;
-		self.rxBuffer.clear();
 		while run:
 			try:
 				self.socket.settimeout(DDModbus.CLEANING_TIMEOUT);
@@ -202,7 +142,7 @@ class DDModbus:
 	def slaveRx(self,modbusSlaveAddress):
 			try:
 				self.socket.settimeout(DDModbus.SLAVE_RX_TIMEOUT);
-				data=self._receive_frame(modbusSlaveAddress,False);
+				data=self.socket.recv(2048);
 				self.logger.debug('Frame received: '+data.hex());
 				
 				#frame consistency check
@@ -262,7 +202,6 @@ class DDModbus:
 				return False;
 				
 	def masterReadAnalog(self,modbusAddress,regAddress,regNb):
-		self.clean();
 		
 		#build request
 		request=bytearray();
@@ -284,7 +223,7 @@ class DDModbus:
 		#wait for answer
 		try:
 			self.socket.settimeout(DDModbus.MASTER_RX_TIMEOUT);
-			answer=self._receive_frame(modbusAddress,True,DDModbus.READ_ANALOG_HOLDING_REGISTERS,2*regNb);
+			answer=self.socket.recv(2048);
 			self.logger.debug('Answer received: '+answer.hex());
 			
 			#check answer
@@ -333,7 +272,6 @@ class DDModbus:
 			return;
 			
 	def masterWriteAnalog(self,modbusAddress,regAddress,data):
-		self.clean();
 		#build request
 		request=bytearray();
 		#byte 0
@@ -365,7 +303,7 @@ class DDModbus:
 		#wait for ack
 		try:
 			self.socket.settimeout(DDModbus.MASTER_RX_TIMEOUT);
-			answer=self._receive_frame(modbusAddress,True,DDModbus.WRITE_MULTIPLE_REGISTERS);
+			answer=self.socket.recv(2048);
 			self.logger.debug('Ack received: '+answer.hex());
 			#check ack
 			waited_ack=request[0:6];
@@ -376,7 +314,7 @@ class DDModbus:
 				self.logger.info('Ack OK');
 				return(True);
 			else:
-				self.logger.warning('Ack KO. Waited Ack was : '+waited_ack.hex()+' received: '+answer.hex());
+				self.logger.warning('Ack KO. Waited Ack was : '+waited_ack.hex());
 				return(False);
 			
 			

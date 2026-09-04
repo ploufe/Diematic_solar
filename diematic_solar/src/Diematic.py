@@ -58,9 +58,6 @@ class DDREGISTER(IntEnum):
 	NB_IMPULS_UNIT=251;
 	FCT_BRUL_DIX=78;
 	FCT_BRUL_UNIT=252;
-	SOLAR_TEMP=467;
-	SOLAR_BOILER_TEMP=468;
-	INSTANT_POWER=471
 	
 #This class allow to read/write parameters to Diematic regulator with the helo of a RS485/TCPIP converter
 #refresh of attributes From regulator is done roughly every minute
@@ -164,9 +161,6 @@ class Diematic:
 		self._zoneBAntiiceTargetTemp=None;
 		self._nbImpuls=None;
 		self._fctBrul=None;
-		self.solarTemp=None;
-		self.solarBoilerTemp=None;
-		self.instantPower=None;
 		
 	def initRegulator(self):
 		#RS485 converter connexion init
@@ -386,8 +380,6 @@ class Diematic:
 		self.returnTemp=self.float10(self.registers[DDREGISTER.RETURN_TEMP]);
 		self.waterPressure=self.float10(self.registers[DDREGISTER.PRESSION_EAU]);
 		self.smokeTemp=self.float10(self.registers[DDREGISTER.SMOKE_TEMP]);
-		if self.smokeTemp is not None and self.smokeTemp < -50:
-			self.smokeTemp=None;
 		self.ionizationCurrent=self.float10(self.registers[DDREGISTER.IONIZATION_CURRENT]);
 		self.fanSpeed=self.registers[DDREGISTER.FAN_SPEED];
 		self.burnerStatus=(self.registers[DDREGISTER.BASE_ECS] & 0x08) >>3;
@@ -395,34 +387,24 @@ class Diematic:
 		if (self.ionizationCurrent is not None):
 			self.burnerPower=round((self.registers[DDREGISTER.FAN_SPEED] / FAN_SPEED_MAX)*100) if (self.ionizationCurrent>0) else 0;
 		self.alarm={'id':None,'txt':None}
-		alarm_id=self.registers[DDREGISTER.ALARME];
-		if (alarm_id==0xFFFF):
-			self.alarm['txt']='Indisponible';
-		elif (alarm_id==0):
+		self.alarm['id']=self.registers[DDREGISTER.ALARME];
+		if (self.alarm['id']==0):
 			self.alarm['txt']='OK';
-		elif (alarm_id==10):
-			self.alarm['id']=alarm_id;
+		elif (self.alarm['id']==10):
 			self.alarm['txt']='Défaut Sonde Retour';
-		elif (alarm_id==21):
-			self.alarm['id']=alarm_id;
+		elif (self.alarm['id']==21):
 			self.alarm['txt']='Pression d\'eau basse';
-		elif (alarm_id==26):
-			self.alarm['id']=alarm_id;
+		elif (self.alarm['id']==26):
 			self.alarm['txt']='Défaut Allumage';
-		elif (alarm_id==27):
-			self.alarm['id']=alarm_id;
+		elif (self.alarm['id']==27):
 			self.alarm['txt']='Flamme Parasite';
-		elif (alarm_id==28):
-			self.alarm['id']=alarm_id;
+		elif (self.alarm['id']==28):
 			self.alarm['txt']='STB Chaudière';
-		elif (alarm_id==30):
-			self.alarm['id']=alarm_id;
+		elif (self.alarm['id']==30):
 			self.alarm['txt']='Rearm. Coffret';	
-		elif (alarm_id==31):
-			self.alarm['id']=alarm_id;
+		elif (self.alarm['id']==31):
 			self.alarm['txt']='Défaut Sonde Fumée';
 		else:
-			self.alarm['id']=alarm_id;
 			self.alarm['txt']='Défaut inconnu';
 		
 		#hotwater
@@ -507,14 +489,8 @@ class Diematic:
 			# fctBrul coded in hex on 2 registers
 			self._fctBrul = self.hex2reg(DDREGISTER.FCT_BRUL_DIX, DDREGISTER.FCT_BRUL_UNIT);
 
-		# Solar registers are available on Diematic 3, Diematic 4 and Delta.
-		self.solarTemp=self.float10(self.registers.get(DDREGISTER.SOLAR_TEMP, 0xFFFF));
-		self.solarBoilerTemp=self.float10(self.registers.get(DDREGISTER.SOLAR_BOILER_TEMP, 0xFFFF));
-		self.instantPower=self.float10(self.registers.get(DDREGISTER.INSTANT_POWER, 0xFFFF));
-
 		self.updateCallback();
 
-	
 
 
 #property used to launch Modbus loop

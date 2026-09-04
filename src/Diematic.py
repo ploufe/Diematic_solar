@@ -58,9 +58,6 @@ class DDREGISTER(IntEnum):
 	NB_IMPULS_UNIT=251;
 	FCT_BRUL_DIX=78;
 	FCT_BRUL_UNIT=252;
-	SOLAR_TEMP=467;
-	SOLAR_BOILER_TEMP=468;
-	INSTANT_POWER=471
 	
 #This class allow to read/write parameters to Diematic regulator with the helo of a RS485/TCPIP converter
 #refresh of attributes From regulator is done roughly every minute
@@ -164,9 +161,6 @@ class Diematic:
 		self._zoneBAntiiceTargetTemp=None;
 		self._nbImpuls=None;
 		self._fctBrul=None;
-		self.solarTemp=None;
-		self.solarBoilerTemp=None;
-		self.instantPower=None;
 		
 	def initRegulator(self):
 		#RS485 converter connexion init
@@ -494,15 +488,9 @@ class Diematic:
 			
 			# fctBrul coded in hex on 2 registers
 			self._fctBrul = self.hex2reg(DDREGISTER.FCT_BRUL_DIX, DDREGISTER.FCT_BRUL_UNIT);
-			
-			#Solar			
-			self.solarTemp=self.float10(self.registers.get(DDREGISTER.SOLAR_TEMP, 0xFFFF));
-			self.solarBoilerTemp=self.float10(self.registers.get(DDREGISTER.SOLAR_BOILER_TEMP, 0xFFFF));
-			self.instantPower=self.float10(self.registers.get(DDREGISTER.INSTANT_POWER, 0xFFFF));
-			
+
 		self.updateCallback();
 
-	
 
 
 #property used to launch Modbus loop

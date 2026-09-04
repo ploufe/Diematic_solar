@@ -60,10 +60,6 @@ def diematicPublish(self):
 		
 	#boiler
 	buffer.update('status',ONLINE if self.availability else OFFLINE);
-	if not self.availability:
-		# Keep retained measurements when Modbus is temporarily unavailable.
-		buffer.send();
-		return;
 	buffer.update('date',self.datetime.isoformat() if self.datetime is not None else '');
 	buffer.update('lastTimeSync',self.lastTimeSync.isoformat() if self.lastTimeSync is not None else '');
 	buffer.update('type',intValue(self.type));
@@ -106,11 +102,6 @@ def diematicPublish(self):
 	buffer.update('zoneB/nightTemp',floatValue(self.zoneBNightTargetTemp));
 	buffer.update('zoneB/antiiceTemp',floatValue(self.zoneBAntiiceTargetTemp));
 	
-	#solar
-	buffer.update('solar/temp',floatValue(self.solarTemp));
-	buffer.update('solar/boilerTemp',floatValue(self.solarBoilerTemp));
-	buffer.update('solar/power',floatValue(self.instantPower));
-	
 	#send MQTT messages
 	buffer.send();
 
@@ -136,7 +127,7 @@ def haSendDiscoveryMessages(client, userdata, message):
 		hassio.addSensor('pump_power',"Puissance Pompe",'power_factor','pumpPower',None,"%");
 		hassio.addSensor('alarm',"Etat",None,'alarm',"{{ value_json.txt}}",None);
 		hassio.addSensor('alarm_id',"N° Erreur",None,'alarm',"{{ value_json.id}}",None);
-		hassio.removeEntity('sensor','nb_impuls');
+		hassio.addSensor('nb_impuls',"Impulsions Bruleur",None,'nbImpuls',None,None);	
 		hassio.addSensor('fct_brul',"Fonctionnement Bruleur",None,'fctBrul',None,"hours");
 		
 		#hot water
@@ -146,11 +137,6 @@ def haSendDiscoveryMessages(client, userdata, message):
 		hassio.addSensor('hot_water_mode',"Mode ECS",None,'hotWater/mode',None,None);
 		hassio.addNumber('hot_water_temp_day',"Température ECS Jour",'hotWater/dayTemp','hotWater/dayTemp/set',10,80,5,"°C");
 		hassio.addNumber('hot_water_temp_night',"Température ECS Nuit",'hotWater/nightTemp','hotWater/nightTemp/set',10,80,5,"°C");
-		
-		#solar
-		hassio.addSensor('solar_temp',"Température Capteur Solaire",'temperature','solar/temp',None,"°C");
-		hassio.addSensor('solar_boiler_temp',"Température Ballon Solaire",'temperature','solar/boilerTemp',None,"°C");
-		hassio.addSensor('solar_power',"Puissance Instantanée",'power','solar/power',None,"kW");
 		
 		#area A
 		hassio.addSensor('zone_A_temp',"Température Zone A",'temperature','zoneA/temp',None,"°C");
@@ -162,17 +148,13 @@ def haSendDiscoveryMessages(client, userdata, message):
 		hassio.addNumber('zone_A_temp_antiice',"Température Antigel Zone A",'zoneA/antiiceTemp','zoneA/antiiceTemp/set',5,20,0.5,"°C");
 		
 		#area B
-		if (panel.zoneBMode is not None) or panel.forceCircuitB:
-			hassio.addSensor('zone_B_temp',"Température Zone B",'temperature','zoneB/temp',None,"°C");
-			hassio.addSelect('zone_B_mode',"Mode Zone B",'zoneB/mode','zoneB/mode/set',['AUTO','TEMP JOUR','PERM JOUR','TEMP NUIT','PERM NUIT','ANTIGEL']);
-			hassio.addSensor('zone_B_mode',"Mode Zone B",None,'zoneB/mode',None,None);
-			hassio.addBinarySensor('zone_B_pump',"Pompe Zone B",None,'zoneB/pump',"1","0");
-			hassio.addNumber('zone_B_temp_day',"Température Jour Zone B",'zoneB/dayTemp','zoneB/dayTemp/set',5,30,0.5,"°C");
-			hassio.addNumber('zone_B_temp_night',"Température Nuit Zone B",'zoneB/nightTemp','zoneB/nightTemp/set',5,30,0.5,"°C");
-			hassio.addNumber('zone_B_temp_antiice',"Température Antigel Zone B",'zoneB/antiiceTemp','zoneB/antiiceTemp/set',5,20,0.5,"°C");
-		else:
-			for component, object_id in [('sensor','zone_B_temp'),('select','zone_B_mode'),('sensor','zone_B_mode'),('binary_sensor','zone_B_pump'),('number','zone_B_temp_day'),('number','zone_B_temp_night'),('number','zone_B_temp_antiice')]:
-				hassio.removeEntity(component,object_id);
+		hassio.addSensor('zone_B_temp',"Température Zone B",'temperature','zoneB/temp',None,"°C");
+		hassio.addSelect('zone_B_mode',"Mode Zone B",'zoneB/mode','zoneB/mode/set',['AUTO','TEMP JOUR','PERM JOUR','TEMP NUIT','PERM NUIT','ANTIGEL']);
+		hassio.addSensor('zone_B_mode',"Mode Zone B",None,'zoneB/mode',None,None);
+		hassio.addBinarySensor('zone_B_pump',"Pompe Zone B",None,'zoneB/pump',"1","0");
+		hassio.addNumber('zone_B_temp_day',"Température Jour Zone B",'zoneB/dayTemp','zoneB/dayTemp/set',5,30,0.5,"°C");
+		hassio.addNumber('zone_B_temp_night',"Température Nuit Zone B",'zoneB/nightTemp','zoneB/nightTemp/set',5,30,0.5,"°C");
+		hassio.addNumber('zone_B_temp_antiice',"Température Antigel Zone B",'zoneB/antiiceTemp','zoneB/antiiceTemp/set',5,20,0.5,"°C");		
 		
 	
 def on_connect(client, userdata, flags, reason_code, properties=None):
@@ -318,7 +300,6 @@ if __name__ == '__main__':
 		#Home Assistant discovery settings
 		hassioDiscoveryEnable=config.getboolean('Home Assistant','MQTT_DiscoveryEnable');
 		hassioDiscoveryPrefix=config.get('Home Assistant','discovery_prefix');	
-		keepLastState=config.getboolean('Home Assistant','keep_last_state',fallback=True);
 		
 		logger.critical('Hassio Discovery Enable: '+ str(hassioDiscoveryEnable));
 		logger.critical('Hassio Discovery Prefix: '+ hassioDiscoveryPrefix);
@@ -366,7 +347,7 @@ if __name__ == '__main__':
 		
 		#create HomeAssistant discovery instance
 
-		hassio=Hassio.Hassio(client,mqttTopicPrefix,mqttClientId,hassioDiscoveryPrefix,not keepLastState);
+		hassio=Hassio.Hassio(client,mqttTopicPrefix,mqttClientId,hassioDiscoveryPrefix);
 		hassio.availabilityInfo('status',ONLINE,OFFLINE);
 		hassio.setDevice("De Dietrich",regulatorType,mqttClientId)
 	

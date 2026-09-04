@@ -1,5 +1,5 @@
 name: "Diematic Solar"
-version: "1.0.13"
+version: "1.0.14"
 slug: "diematic_solar"
 description: "Publie les données d'une chaudière Diematic sur MQTT et Home Assistant"
 url: "https://github.com/ploufe/Diematic_solar"
