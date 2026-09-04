@@ -262,6 +262,7 @@ class DDModbus:
 				return False;
 				
 	def masterReadAnalog(self,modbusAddress,regAddress,regNb):
+		self.clean();
 		
 		#build request
 		request=bytearray();
@@ -332,6 +333,7 @@ class DDModbus:
 			return;
 			
 	def masterWriteAnalog(self,modbusAddress,regAddress,data):
+		self.clean();
 		#build request
 		request=bytearray();
 		#byte 0
